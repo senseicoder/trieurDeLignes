@@ -49,7 +49,7 @@ printf('<div class="choices"><form action="index.php" method="get">');
 foreach($_SESSION['aChoices'] as $sChoice) {
 	printf('<span class="button"><a href="?store=%1$d&where=%2$s">%2$s</a></span>', $_SESSION['iLine'], $sChoice);
 }
-printf('<br clear="both"/><br><div>Nouveau&nbsp;<input type="text" name="newChoice"/>&nbsp;<input type="button" value="add"/></div>');
+printf('<br clear="both"/><br><div>Nouveau&nbsp;<input type="text" name="newChoice"/>&nbsp;<input type="submit" value="add"/></div>');
 printf('</form></div>');
 
 printf('<div><a href="?">Recharger</a> - <a href="?write">Sauver</a> - <a href="?reset">Reset</a></div>');

@@ -1,9 +1,16 @@
-<style type="text/css">
-	.lineCurrent { font-weight: bold }
-	.lineNext { color: grey; }
-	.choices { padding: 1em; margin: 1em 0 }
-	.button { border: 1px solid red; margin: 0 5px ; padding: 3px;}
-</style>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<title>trieurDeLignes</title>
+	<meta content="text/html;charset=UTF-8" http-equiv="content-type" />
+	<style type="text/css">
+		.lineCurrent { font-weight: bold }
+		.lineNext { color: grey; }
+		.choices { padding: 1em; margin: 1em 0 }
+		.button { border: 1px solid red; margin: 1em 5px ; padding: 1px;}
+	</style>
+</head>
+<body>
 
 <?php
 
@@ -12,7 +19,7 @@ session_start();
 if(isset($_GET['reset'])) $_SESSION = array();
 
 if( ! isset($_SESSION['aLines'])) {
-	$sFile = __DIR__ . '/../NexusNotes.txt';
+	$sFile = '/home/cedric/atrier.txt';
 	$_SESSION['aLines'] = array();
 	foreach(file($sFile) as $sLine) {
 		$sLine = trim($sLine);
@@ -30,7 +37,12 @@ if(isset($_GET['store']) && isset($_GET['where'])) {
 if(isset($_GET['write'])) {
 	$a = array();
 	foreach($_SESSION['aLines'] as $aData) {
-		#TODO
+		$sDest = $aData['dest'];
+		if($sDest != '') $a[$sDest][] = $aData['line'];
+	}
+
+	foreach($a as $sDest => $aList) {
+		printf('<b>%s</b><br/>%s<br/><br/>', $sDest, implode('<br/>', $aList));
 	}
 }
 
@@ -40,16 +52,23 @@ if(isset($_GET['newChoice'])) {
 	$_SESSION['iLine']++;	
 }
 
-printf('<div class="lineCurrent">%s</div>', $_SESSION['aLines'][$_SESSION['iLine']]['line']);
-for($ct = $_SESSION['iLine']+1; $ct<$_SESSION['iLine']+4; $ct++) {
-	if(isset($_SESSION['aLines'][$ct])) printf('<div class="lineNext">%s</div>', $_SESSION['aLines'][$ct]['line']);
-}
+if(isset($_SESSION['aLines'][$_SESSION['iLine']]['line'])) {
+	printf('<div>%d / %d</div>', $_SESSION['iLine'], count($_SESSION['aLines']));
 
-printf('<div class="choices"><form action="index.php" method="get">');
-foreach($_SESSION['aChoices'] as $sChoice) {
-	printf('<span class="button"><a href="?store=%1$d&where=%2$s">%2$s</a></span>', $_SESSION['iLine'], $sChoice);
-}
-printf('<br clear="both"/><br><div>Nouveau&nbsp;<input type="text" name="newChoice"/>&nbsp;<input type="submit" value="add"/></div>');
-printf('</form></div>');
+	printf('<div class="lineCurrent">%s</div>', $_SESSION['aLines'][$_SESSION['iLine']]['line']);
+	for($ct = $_SESSION['iLine']+1; $ct<$_SESSION['iLine']+4; $ct++) {
+		if(isset($_SESSION['aLines'][$ct])) printf('<div class="lineNext">%s</div>', $_SESSION['aLines'][$ct]['line']);
+	}
 
+	printf('<div class="choices"><form action="index.php" method="get">');
+	foreach($_SESSION['aChoices'] as $sChoice) {
+		printf('<span class="button"><a href="?store=%1$d&where=%2$s">%2$s</a></span>', $_SESSION['iLine'], $sChoice);
+	}
+	printf('<br clear="both"/><br><div>Nouveau&nbsp;<input type="text" name="newChoice"/>&nbsp;<input type="submit" value="add"/></div>');
+	printf('</form></div>');
+}
 printf('<div><a href="?">Recharger</a> - <a href="?write">Sauver</a> - <a href="?reset">Reset</a></div>');
+
+?>
+</body>
+</html>

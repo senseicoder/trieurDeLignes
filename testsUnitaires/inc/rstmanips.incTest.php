@@ -75,6 +75,7 @@ class CAAnalyseStructure extends CAction
 	function Run(array & $aData)
 	{
 		$aData['levels'] = array();
+		$aData['titles'] = array();
 
 		foreach($aData['lines'] as $id => & $aLine) {
 			switch($aLine['nature']) {
@@ -99,6 +100,7 @@ class CAAnalyseStructure extends CAction
 					}
 
 					$aData['lines'][$id - 1]['titrelevel'] = array_search($aLine['char'], $aData['levels']);
+					$aData['titles'][] = $id - 1;
 					break;
 
 				default: throw new Exception('ligne non traitée : ' . $aLine['raw']);
@@ -117,22 +119,27 @@ class CAExtraireStructure extends CAction
 
 	function Run(array & $aData)
 	{
-		$aData['structure'] = array();
-		$aParent = & $aData['structure'];
+		$idPrev = NULL;
 		$iLevel = 0;
+		$aData['level0'] = array();
 
-		foreach($aData['lines'] as $id => & $aLine) {
-			switch($aLine['nature']) {
-				case CRSTLigne::TITRE : 
-					$aParent['children'][] = $aLine;
-					printf('%s, %d<br>', $aLine['raw'], $aLine['titrelevel']);
-					break;
+		foreach($aData['titles'] as $idTitre => $idLine) {
+			$aLine = $aData['lines'][$idLine];
+			echo "traitement " . $aLine['raw'] . "<br>";
 
-				case CRSTLigne::SUBTITRE : break;
-				case CRSTLigne::VIDE : break;
-				default: throw new Exception('ligne non traitée : ' . $aLine['raw']);
+			if($aLine['titrelevel'] > $iLevel) $idPrev = $aData['titles'][$idTitre - 1];
+			elseif($aLine['titrelevel'] < $iLevel) {
+				if($idPrev !== NULL) $idPrev = $aData['lines'][$idPrev]['parent'];
 			}
+			$iLevel = $aLine['titrelevel'];
+
+			if($idPrev === NULL) $aData['level0'][] = $idLine;
+			else $aData['lines'][$idPrev]['children'][] = $idLine;
+
+			$aData['lines'][$idLine]['parent'] = $idPrev;
+			$aData['lines'][$idLine]['children'] = array();
 		}
+		var_dump($aData['lines']);
 	}
 }
 
@@ -211,57 +218,75 @@ class testCRstLayers extends PHPUnit_Framework_TestCase
 	{
 		$a = CRstLayers::Charger(__DIR__ . '/rst/titre.rst');
 
-		var_dump($a['structure']);
+		var_dump($a['titles']);
 
 		$this->AssertEquals('#', $a['levels'][0]);
 		$this->AssertEquals('=', $a['levels'][1]);
 		$this->AssertEquals('-', $a['levels'][2]);
 
+		$this->AssertEquals(array(0), $a['level0']);
+
 		$i = 0;
 		$this->AssertEquals(CRSTLigne::TITRE, $a['lines'][$i]['nature']);		
 		$this->AssertEquals(0, $a['lines'][$i]['titrelevel']);
+		$this->AssertEquals(NULL, $a['lines'][$i]['parent']);
+		$this->AssertEquals(array(3, 12), $a['lines'][$i]['children']);
 		$i++;
 		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);		
 		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);		
 
 		$this->AssertEquals(CRSTLigne::TITRE, $a['lines'][$i]['nature']);		
 		$this->AssertEquals(1, $a['lines'][$i]['titrelevel']);
+		$this->AssertEquals(0, $a['lines'][$i]['parent']);
+		$this->AssertEquals(array(6, 9), $a['lines'][$i]['children']);
 		$i++;
 		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);		
 		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);		
 
 		$this->AssertEquals(CRSTLigne::TITRE, $a['lines'][$i]['nature']);		
 		$this->AssertEquals(2, $a['lines'][$i]['titrelevel']);
+		$this->AssertEquals(3, $a['lines'][$i]['parent']);
+		$this->AssertEquals(array(), $a['lines'][$i]['children']);
 		$i++;
 		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);		
 		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);		
 
 		$this->AssertEquals(CRSTLigne::TITRE, $a['lines'][$i]['nature']);		
 		$this->AssertEquals(2, $a['lines'][$i]['titrelevel']);
+		$this->AssertEquals(3, $a['lines'][$i]['parent']);
+		$this->AssertEquals(array(), $a['lines'][$i]['children']);
 		$i++;
 		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);		
 		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);		
 
 		$this->AssertEquals(CRSTLigne::TITRE, $a['lines'][$i]['nature']);		
 		$this->AssertEquals(1, $a['lines'][$i]['titrelevel']);
+		$this->AssertEquals(0, $a['lines'][$i]['parent']);
+		$this->AssertEquals(array(15, 18, 21), $a['lines'][$i]['children']);
 		$i++;
 		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);		
 		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);		
 
 		$this->AssertEquals(CRSTLigne::TITRE, $a['lines'][$i]['nature']);		
 		$this->AssertEquals(2, $a['lines'][$i]['titrelevel']);
+		$this->AssertEquals(12, $a['lines'][$i]['parent']);
+		$this->AssertEquals(array(), $a['lines'][$i]['children']);
 		$i++;
 		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);		
 		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);		
 
 		$this->AssertEquals(CRSTLigne::TITRE, $a['lines'][$i]['nature']);		
 		$this->AssertEquals(2, $a['lines'][$i]['titrelevel']);
+		$this->AssertEquals(12, $a['lines'][$i]['parent']);
+		$this->AssertEquals(array(), $a['lines'][$i]['children']);
 		$i++;
 		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);		
 		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);		
 
 		$this->AssertEquals(CRSTLigne::TITRE, $a['lines'][$i]['nature']);		
 		$this->AssertEquals(2, $a['lines'][$i]['titrelevel']);
+		$this->AssertEquals(12, $a['lines'][$i]['parent']);
+		$this->AssertEquals(array(), $a['lines'][$i]['children']);
 		$i++;
 		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);
 

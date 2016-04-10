@@ -14,6 +14,14 @@ class testCRstLayers extends PHPUnit_Framework_TestCase
 		$this->AssertEquals($aChildren, $this->_aDocument['lines'][$i]['children']);
 	}
 
+	function assertLignePuce($i, $iLevel, $iParent, array $aChildren = array())
+	{
+		$this->AssertEquals(CRSTLigne::PUCE, $this->_aDocument['lines'][$i]['nature']);		
+		$this->AssertEquals($iLevel, $this->_aDocument['lines'][$i]['pucelevel']);
+		$this->AssertEquals($iParent, $this->_aDocument['lines'][$i]['parent']);
+		$this->AssertEquals($aChildren, $this->_aDocument['lines'][$i]['children']);
+	}
+
 	function testChargement_Titres()
 	{
 		$a = CRstLayers::Charger(__DIR__ . '/rst/titre.rst');
@@ -58,5 +66,33 @@ class testCRstLayers extends PHPUnit_Framework_TestCase
 		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);
 
 		$this->AssertEquals(count($a['lines']), $i);
+	}
+
+	function testChargement_Puces()
+	{
+		$a = CRstLayers::Charger(__DIR__ . '/rst/titres_et_puces.rst');
+		$this->_aDocument = $a;
+
+		$i = 0;
+		$this->assertLigneTitre($i++, 0, NULL, array(3));
+		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);		
+		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);		
+
+		$this->assertLigneTitre($i++, 1, 0, array(9));
+		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);		
+		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);
+
+		$this->assertLignePuce($i++, 0, 0);
+		$this->assertLignePuce($i++, 0, 0);
+		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);
+
+		$this->assertLigneTitre($i++, 2, 3, array());
+		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);		
+		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);	
+
+		$this->assertLignePuce($i++, 0, 3);
+		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);
+		$this->assertLignePuce($i++, 1, 12);
+		$this->assertLignePuce($i++, 1, 12);
 	}
 }

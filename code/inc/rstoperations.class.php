@@ -77,13 +77,16 @@ class CAAnalyseStructure extends CAction
 					break; 
 
 				case CRSTLigne::PUCE : 
+					$aData['lines'][$id]['pucelevel'] = 0;
+					$aData['lines'][$id]['parent'] = NULL;
+					$aData['lines'][$id]['children'] = array();
 					break;
 
 				case CRSTLigne::SUBTITRE : 
 					$aLine['char'] = $aLine['raw'][0];
 
 					$aData['lines'][$id - 1]['nature'] = CRSTLigne::TITRE;
-					if(! in_array($aLine['char'], $aData['levels'])) {
+					if( ! in_array($aLine['char'], $aData['levels'])) {
 						$aData['levels'][] = $aLine['char'];
 					}
 

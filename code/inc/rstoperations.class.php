@@ -60,9 +60,18 @@ class CAAnalyseStructure extends CAction
 		return new $sClass();
 	}
 
+	function CalculerPuceLevel($sLine)
+	{
+		if(preg_match('/^([ ][ ])/', $sLine, $aMatch)) {
+			return strlen($aMatch[1]) / 2;
+		}
+		return 0;
+	}
+
 	function Run(array & $aData)
 	{
 		$aData['levels'] = array();
+		$iLevel = 0;
 
 		foreach($aData['lines'] as $id => & $aLine) {
 			switch($aLine['nature']) {
@@ -72,7 +81,8 @@ class CAAnalyseStructure extends CAction
 					break; 
 
 				case CRSTLigne::PUCE : 
-					$aData['lines'][$id]['pucelevel'] = 0;
+					$aData['lines'][$id]['pucelevel'] = $this->CalculerPuceLevel($aLine['raw']);
+					$aData['lines'][$id]['level'] = $iLevel + 1 + $aData['lines'][$id]['pucelevel'];
 					$aData['lines'][$id]['parent'] = NULL;
 					$aData['lines'][$id]['children'] = array();
 					break;
@@ -85,7 +95,8 @@ class CAAnalyseStructure extends CAction
 						$aData['levels'][] = $aLine['char'];
 					}
 
-					$aData['lines'][$id - 1]['titrelevel'] = array_search($aLine['char'], $aData['levels']);
+					$iLevel = array_search($aLine['char'], $aData['levels']);
+					$aData['lines'][$id - 1]['level'] = $iLevel;
 					break;
 
 				default: throw new Exception('ligne non traitée : ' . $aLine['raw']);
@@ -112,16 +123,16 @@ class CAExtraireStructure extends CAction
 			switch($aLine['nature']) {
 				case CRSTLigne::TEXTE : 
 				case CRSTLigne::VIDE :
-				case CRSTLigne::PUCE : 
 				case CRSTLigne::SUBTITRE : 
 					break;
 
+				case CRSTLigne::PUCE : 
 				case CRSTLigne::TITRE : 
-					if($aLine['titrelevel'] > $iLevel) $idPrev = $idPrevPotentiel;
-					elseif($aLine['titrelevel'] < $iLevel) {
+					if($aLine['level'] > $iLevel) $idPrev = $idPrevPotentiel;
+					elseif($aLine['level'] < $iLevel) {
 						if($idPrev !== NULL) $idPrev = $aData['lines'][$idPrev]['parent'];
 					}
-					$iLevel = $aLine['titrelevel'];
+					$iLevel = $aLine['level'];
 
 					if($idPrev === NULL) $aData['level0'][] = $id;
 					else $aData['lines'][$idPrev]['children'][] = $id;

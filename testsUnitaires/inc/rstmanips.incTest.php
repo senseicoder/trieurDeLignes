@@ -112,7 +112,7 @@ class testCRstLayers extends PHPUnit_Framework_TestCase
 		$this->assertFileEquals($sFile, $sTmp);
 	}
 
-	function testSupressionLigne()
+	function testSupressionLignePuce()
 	{
 		$sTmp = tempnam(sys_get_temp_dir(), 'tst');
 		$sFile = __DIR__ . '/rst/titres_et_puces.rst';
@@ -125,7 +125,7 @@ class testCRstLayers extends PHPUnit_Framework_TestCase
 		$this->assertFileEquals($sFileAttendu, $sTmp);
 	}
 
-	function testSupressionDeuxLignes()
+	function testSupressionDeuxLignesPuces()
 	{
 		$sTmp = tempnam(sys_get_temp_dir(), 'tst');
 		$sFile = __DIR__ . '/rst/titres_et_puces.rst';
@@ -134,6 +134,19 @@ class testCRstLayers extends PHPUnit_Framework_TestCase
 		$o = CRstLayers::Charger($sFile);
 		$o->Suppression(6);
 		$o->Suppression(7);
+		$o->Ecrire($sTmp);
+
+		$this->assertFileEquals($sFileAttendu, $sTmp);
+	}
+
+	function testAjoutLignePuce()
+	{
+		$sTmp = tempnam(sys_get_temp_dir(), 'tst');
+		$sFile = __DIR__ . '/rst/titres_et_puces.rst';
+		$sFileAttendu = __DIR__ . '/rst/titres_et_puces_ajoutpuce.rst';
+
+		$o = CRstLayers::Charger($sFile);
+		$o->Ajout(3, CRSTLigne::PUCE, '* puce1c');
 		$o->Ecrire($sTmp);
 
 		$this->assertFileEquals($sFileAttendu, $sTmp);

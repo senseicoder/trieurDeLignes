@@ -70,4 +70,9 @@ class CRstLayers
 	{
 		unset($this->_aData['lines'][$idLigne]);
 	}
+
+	function Ajout($idPere, $sNature, $sRaw)
+	{
+		
+	}
 }

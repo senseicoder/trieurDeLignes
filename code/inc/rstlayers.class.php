@@ -15,6 +15,7 @@ class CRSTLigne
 class CRstLayers
 {
 	protected $_aActions = array();
+	protected $_aData = array();
 
 	function __construct()
 	{
@@ -28,10 +29,17 @@ class CRstLayers
 	function Run(array $aData = NULL)
 	{
 		if($aData === NULL) $aData = array();
+		$this->_aData = $aData;
+
 		foreach($this->_aActions as $oAction) {
-			$oAction->Run($aData);
+			$oAction->Run($this->_aData);
 		}
-		return $aData;
+		return $this->_aData;
+	}
+
+	function Get()
+	{
+		return $this->_aData;
 	}
 
 	static function Charger($sFilename)
@@ -44,6 +52,22 @@ class CRstLayers
 		$o->Add(CAAnalyseStructure::Make());
 		$o->Add(CAExtraireStructure::Make());
 		#repérer les erreurs de souslignage, de niveau dans les puces, de texte non pucé, etc...
-		return $o->Run($aData);
+		$o->Run($aData);
+
+		return $o;
+	}
+
+	function Ecrire($sFilename)
+	{
+		$f = fopen($sFilename, 'w');
+		foreach($this->_aData['lines'] as $idLine => $aLine) {
+			fwrite($f, $aLine['raw']);
+		}
+		fclose($f);
+	}
+
+	function Suppression($idLigne)
+	{
+		unset($this->_aData['lines'][$idLigne]);
 	}
 }

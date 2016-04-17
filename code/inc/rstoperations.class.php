@@ -63,16 +63,11 @@ class CAAnalyseStructure extends CAction
 	function Run(array & $aData)
 	{
 		$aData['levels'] = array();
-		$aData['titles'] = array();
 
 		foreach($aData['lines'] as $id => & $aLine) {
 			switch($aLine['nature']) {
 				case CRSTLigne::TITRE : 
-					break;
-
 				case CRSTLigne::TEXTE : 
-					break;
-
 				case CRSTLigne::VIDE :
 					break; 
 
@@ -91,7 +86,6 @@ class CAAnalyseStructure extends CAction
 					}
 
 					$aData['lines'][$id - 1]['titrelevel'] = array_search($aLine['char'], $aData['levels']);
-					$aData['titles'][] = $id - 1;
 					break;
 
 				default: throw new Exception('ligne non traitée : ' . $aLine['raw']);
@@ -110,24 +104,35 @@ class CAExtraireStructure extends CAction
 
 	function Run(array & $aData)
 	{
-		$idPrev = NULL;
+		$idPrev = $idPrevPotentiel = NULL;
 		$iLevel = 0;
 		$aData['level0'] = array();
 
-		foreach($aData['titles'] as $idTitre => $idLine) {
-			$aLine = $aData['lines'][$idLine];
+		foreach($aData['lines'] as $id => & $aLine) {
+			switch($aLine['nature']) {
+				case CRSTLigne::TEXTE : 
+				case CRSTLigne::VIDE :
+				case CRSTLigne::PUCE : 
+				case CRSTLigne::SUBTITRE : 
+					break;
 
-			if($aLine['titrelevel'] > $iLevel) $idPrev = $aData['titles'][$idTitre - 1];
-			elseif($aLine['titrelevel'] < $iLevel) {
-				if($idPrev !== NULL) $idPrev = $aData['lines'][$idPrev]['parent'];
+				case CRSTLigne::TITRE : 
+					if($aLine['titrelevel'] > $iLevel) $idPrev = $idPrevPotentiel;
+					elseif($aLine['titrelevel'] < $iLevel) {
+						if($idPrev !== NULL) $idPrev = $aData['lines'][$idPrev]['parent'];
+					}
+					$iLevel = $aLine['titrelevel'];
+
+					if($idPrev === NULL) $aData['level0'][] = $id;
+					else $aData['lines'][$idPrev]['children'][] = $id;
+
+					$aLine['parent'] = $idPrev;
+					$aLine['children'] = array();
+					$idPrevPotentiel = $id;
+					break;
+
+				default: throw new Exception('ligne non traitée : ' . $aLine['raw']);
 			}
-			$iLevel = $aLine['titrelevel'];
-
-			if($idPrev === NULL) $aData['level0'][] = $idLine;
-			else $aData['lines'][$idPrev]['children'][] = $idLine;
-
-			$aData['lines'][$idLine]['parent'] = $idPrev;
-			$aData['lines'][$idLine]['children'] = array();
 		}
 	}
 }

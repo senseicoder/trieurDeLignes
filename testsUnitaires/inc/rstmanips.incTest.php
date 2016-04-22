@@ -101,6 +101,35 @@ class testCRstLayers extends PHPUnit_Framework_TestCase
 		$this->assertLignePuce($i++, 4, 12);
 	}
 
+	function testChargement_Textes()
+	{
+		$o = CRstLayers::Charger(__DIR__ . '/rst/titres_et_textes.rst');
+		$a = $o->Get();
+		$this->_aDocument = $a;
+
+		$idSujet1 = 3;
+		$idSujet2 = 9;
+
+		$i = 0;
+		$this->assertLigneTitre($i++, 0, NULL, array(3));
+		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);		
+		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);		
+
+		$this->assertLigneTitre($i++, 1, 0, array(6, 7, 9));
+		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);		
+		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);
+
+		$this->AssertEquals(CRSTLigne::TEXTE, $a['lines'][$i++]['nature']);
+		$this->AssertEquals(CRSTLigne::TEXTE, $a['lines'][$i++]['nature']);
+		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);
+
+		$this->assertLigneTitre($i++, 2, $idSujet1, array(12));
+		$this->AssertEquals(CRSTLigne::SUBTITRE, $a['lines'][$i++]['nature']);		
+		$this->AssertEquals(CRSTLigne::VIDE, $a['lines'][$i++]['nature']);	
+
+		$this->AssertEquals(CRSTLigne::TEXTE, $a['lines'][$i++]['nature']);
+	}
+
 	function testEcritureRst()
 	{
 		$sTmp = tempnam(sys_get_temp_dir(), 'tst');

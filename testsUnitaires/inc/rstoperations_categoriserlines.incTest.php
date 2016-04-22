@@ -33,4 +33,12 @@ class testCACategoriserLignes extends PHPUnit_Framework_TestCase
 		$this->AssertEquals(CRSTLigne::VIDE, CACategoriserLignes::Analyser('	'));	
 		$this->AssertEquals(CRSTLigne::VIDE, CACategoriserLignes::Analyser('   '));	
 	}
+
+	function testParagraphe()
+	{
+		$this->AssertEquals(CRSTLigne::TEXTE, CACategoriserLignes::Analyser('a'));	
+		$this->AssertEquals(CRSTLigne::TEXTE, CACategoriserLignes::Analyser("aaaa"));	
+		$this->AssertEquals(CRSTLigne::TEXTE, CACategoriserLignes::Analyser('ceci est une ligne'));	
+		$this->AssertEquals(CRSTLigne::TEXTE, CACategoriserLignes::Analyser('encore une ligne et, voilà'));		
+	}
 }

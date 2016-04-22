@@ -33,7 +33,7 @@ class CACategoriserLignes extends CAction
 	{
 		if( ! empty($sLine)) {
 			$c = $sLine[0];
-			if($c !== ' ' && preg_match('/^[' . $c . ']{3,}[ \t]*$/', $sLine)) {
+			if(in_array($c, array('=', '#', '~', '-')) && preg_match('/^[' . $c . ']{3,}[ \t]*$/', $sLine)) {
 				return CRSTLigne::SUBTITRE;
 			}
 		}
@@ -122,6 +122,10 @@ class CAExtraireStructure extends CAction
 		foreach($aData['lines'] as $id => & $aLine) {
 			switch($aLine['nature']) {
 				case CRSTLigne::TEXTE : 
+					if($idPrevPotentiel === NULL) $aData['level0'][] = $id;
+					else $aData['lines'][$idPrevPotentiel]['children'][] = $id;
+					break;
+
 				case CRSTLigne::VIDE :
 				case CRSTLigne::SUBTITRE : 
 					break;

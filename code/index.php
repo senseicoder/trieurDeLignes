@@ -63,7 +63,7 @@ function DisplayLevel($sPath, array $aStructure, array $aChildren)
 			$aData = $aStructure['lines'][$id];
 			if($aData['nature'] === CRSTLigne::TITRE) {
 				$sUrl = sprintf('?doc=%s&title=%d', urlencode($sPath), $id);
-				printf('<li><a href="%s">%s</a></li>', $sUrl, $aData['raw']);
+				printf('<li><a href="%s">%s</a></li>', $sUrl, $aData['value']);
 				DisplayLevel($sPath, $aStructure, $aData['children']);
 			}
 		}
@@ -79,7 +79,7 @@ function DisplayIn(array $a, array $aData)
 		echo '<ul>';
 		foreach($aData['children'] as $id) {
 			if($a['lines'][$id]['nature'] !== CRSTLigne::TITRE) {
-				printf('<li>%s</li>', $a['lines'][$id]['raw']);
+				printf('<li>%s</li>', $a['lines'][$id]['value']);
 				DisplayIn($a, $a['lines'][$id]);
 			}
 		}

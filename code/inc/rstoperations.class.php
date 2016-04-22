@@ -151,3 +151,50 @@ class CAExtraireStructure extends CAction
 		}
 	}
 }
+
+class CARendreAffichable extends CAction
+{
+	static function Make()
+	{
+		$sClass = __CLASS__;
+		return new $sClass;
+	}
+
+	function MakeLink($s)
+	{
+		$match_href = '|(https?://([\d\w\.-]+\.[\w\.]{2,6})[^\s\]\[\<\>]*/?)|i';
+		$match_hash = '|\B#([\d\w_]+)|i';
+		$match_plus = '|\B\+([\d\w_]+)|i';
+		$replace_url = '<a href="$1" target="_blank">$1</a>';
+		$replace_tag = '<a href="http://url.com/pluslink/$1">$0</a>';		
+
+		$s = preg_replace($match_href, $replace_url, $s);
+		$s = preg_replace($match_hash, $replace_tag, $s);
+		$s = preg_replace($match_plus, $replace_tag, $s);
+
+		return $s;
+	}
+
+	function Run(array & $aData)
+	{
+		foreach($aData['lines'] as $id => & $aLine) {
+			switch($aLine['nature']) {
+				case CRSTLigne::TEXTE : 
+					$aLine['value'] = self::MakeLink($aLine['raw']);
+					break;
+
+				case CRSTLigne::TITRE : 
+				case CRSTLigne::VIDE :
+				case CRSTLigne::SUBTITRE : 
+					$aLine['value'] = $aLine['raw'];
+					break;
+
+				case CRSTLigne::PUCE : 
+					$aLine['value'] = self::MakeLink($aLine['raw']);
+					break;
+
+				default: throw new Exception('ligne non traitée : ' . $aLine['raw']);
+			}
+		}
+	}
+}

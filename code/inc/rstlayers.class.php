@@ -53,6 +53,7 @@ class CRstLayers
 		$o->Add(CACategoriserLignes::Make());
 		$o->Add(CAAnalyseStructure::Make());
 		$o->Add(CAExtraireStructure::Make());
+		$o->Add(CARendreAffichable::Make());
 		#repérer les erreurs de souslignage, de niveau dans les puces, de texte non pucé, etc...
 		$o->Run($aData);
 

@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/rstoperations.class.php';
+
 class CRSTLigne
 {
 	const ROOT = 'ROOT';

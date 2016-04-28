@@ -74,8 +74,24 @@ class CRstLayers
 		unset($this->_aData['lines'][$idLigne]);
 	}
 
+	function GetLastIdChildren($idPere)
+	{
+		return $idPere + 4; //TODO FAKE
+	}
+
 	function Ajout($idPere, $sNature, $sRaw)
 	{
-		
+		#TODO ne gère que les puces
+		#TODO pucelevel, level, parent
+		#TODO gestion fin de ligne ? 
+		$aNew = array(array(
+			'raw' => $sRaw . "\n", 
+			'sNature' => $sNature, 
+			'pucelevel' => 0, 
+			'level' => 0, 
+			'parent' => 0,
+			'children' => array(), 
+			'value' => $sRaw));
+		array_splice($this->_aData['lines'], $this->GetLastIdChildren($idPere) + 1, 0, $aNew);	
 	}
 }

@@ -185,7 +185,7 @@ class testCRstLayers extends PHPUnit_Framework_TestCase
 		$this->assertEquals('* puce1c', $a['lines'][8]['raw']);
 		$this->assertEquals(3, $a['lines'][8]['parent']);
 		$this->assertEquals($a['lines'][7]['level'], $a['lines'][8]['level']);
-		$this->assertEquals($a['lines'][7]['level'], $a['lines'][8]['pucelevel']);
+		$this->assertEquals($a['lines'][7]['pucelevel'], $a['lines'][8]['pucelevel']);
 		$this->assertEquals(array(), $a['lines'][8]['children']);
 		
 		$this->assertFileEquals($sFileAttendu, $sTmp);

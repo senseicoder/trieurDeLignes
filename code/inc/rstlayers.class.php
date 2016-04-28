@@ -66,12 +66,11 @@ class CRstLayers
 		foreach($this->_aData['lines'] as $idLine => $aLine) {
 			switch($aLine['nature']) {
 				case CRSTLigne::PUCE : 
-					$sLine = sprintf('%s* %s', str_repeat(' ', $aLine['pucelevel']), $aLine['value']);
+					$sLine = sprintf('%s* %s', str_repeat(' ', $aLine['pucelevel'] * 2), $aLine['value']);
 					break;
 				default : 
 					$sLine = $aLine['value'];
 			}
-			echo $sLine;
 			fwrite($f, $sLine . "\n");
 		}
 		fclose($f);
@@ -95,7 +94,7 @@ class CRstLayers
 		$aNew = array(array(
 			'raw' => '* ' . $sValue, #TODO FAKE
 			'nature' => $sNature, 
-			'pucelevel' => $this->_aData['lines'][$idPere]['level'] + 1, 
+			'pucelevel' => 0, #TODO FAKE, marche que pour les ajouts d'une puce dans un bloc titre 
 			'level' => $this->_aData['lines'][$idPere]['level'] + 1, 
 			'parent' => $idPere,
 			'children' => array(), 

@@ -16,7 +16,7 @@ class CAChargerLignes extends CAction
 	function Run(array & $aData)
 	{
 		foreach(file($aData['filename']) as $sLine) {
-			$aData['lines'][] = array('raw' => $sLine);
+			$aData['lines'][] = array('raw' => str_replace("\n", '', $sLine));
 		}
 	}
 }
@@ -190,7 +190,7 @@ class CARendreAffichable extends CAction
 					break;
 
 				case CRSTLigne::PUCE : 
-					$aLine['value'] = self::MakeLink($aLine['raw']);
+					$aLine['value'] = self::MakeLink(preg_replace('/^[ ]*[*] /', '', $aLine['raw']));
 					break;
 
 				default: throw new Exception('ligne non traitée : ' . $aLine['raw']);

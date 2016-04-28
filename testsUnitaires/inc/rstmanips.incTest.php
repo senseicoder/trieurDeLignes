@@ -175,9 +175,19 @@ class testCRstLayers extends PHPUnit_Framework_TestCase
 		$sFileAttendu = __DIR__ . '/rst/titres_et_puces_ajoutpuce.rst';
 
 		$o = CRstLayers::Charger($sFile);
-		$o->Ajout(3, CRSTLigne::PUCE, '* puce1c');
+		$o->Ajout(3, CRSTLigne::PUCE, 'puce1c');
 		$o->Ecrire($sTmp);
 
+		$a = $o->Get();
+
+		$this->assertEquals(CRSTLigne::PUCE, $a['lines'][8]['nature']);
+		$this->assertEquals('puce1c', $a['lines'][8]['value']);
+		$this->assertEquals('* puce1c', $a['lines'][8]['raw']);
+		$this->assertEquals(3, $a['lines'][8]['parent']);
+		$this->assertEquals($a['lines'][7]['level'], $a['lines'][8]['level']);
+		$this->assertEquals($a['lines'][7]['level'], $a['lines'][8]['pucelevel']);
+		$this->assertEquals(array(), $a['lines'][8]['children']);
+		
 		$this->assertFileEquals($sFileAttendu, $sTmp);
 	}
 }

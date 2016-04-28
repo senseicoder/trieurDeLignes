@@ -64,7 +64,15 @@ class CRstLayers
 	{
 		$f = fopen($sFilename, 'w');
 		foreach($this->_aData['lines'] as $idLine => $aLine) {
-			fwrite($f, $aLine['raw']);
+			switch($aLine['nature']) {
+				case CRSTLigne::PUCE : 
+					$sLine = sprintf('%s* %s', str_repeat(' ', $aLine['pucelevel']), $aLine['value']);
+					break;
+				default : 
+					$sLine = $aLine['value'];
+			}
+			echo $sLine;
+			fwrite($f, $sLine . "\n");
 		}
 		fclose($f);
 	}
@@ -79,19 +87,19 @@ class CRstLayers
 		return $idPere + 4; //TODO FAKE
 	}
 
-	function Ajout($idPere, $sNature, $sRaw)
+	function Ajout($idPere, $sNature, $sValue)
 	{
 		#TODO ne gère que les puces
 		#TODO pucelevel, level, parent
 		#TODO gestion fin de ligne ? 
 		$aNew = array(array(
-			'raw' => $sRaw . "\n", 
-			'sNature' => $sNature, 
-			'pucelevel' => 0, 
-			'level' => 0, 
-			'parent' => 0,
+			'raw' => '* ' . $sValue, #TODO FAKE
+			'nature' => $sNature, 
+			'pucelevel' => $this->_aData['lines'][$idPere]['level'] + 1, 
+			'level' => $this->_aData['lines'][$idPere]['level'] + 1, 
+			'parent' => $idPere,
 			'children' => array(), 
-			'value' => $sRaw));
+			'value' => $sValue));
 		array_splice($this->_aData['lines'], $this->GetLastIdChildren($idPere) + 1, 0, $aNew);	
 	}
 }

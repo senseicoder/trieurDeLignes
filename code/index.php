@@ -45,59 +45,85 @@ class CDocuments
 		}
 		return $a;
 	}
+
+	function DisplayLineLink($id, $sPath, $sValue)
+	{
+		$sUrl = sprintf('?doc=%s&title=%d', urlencode($sPath), $id);
+		printf('<li><a href="%s">%s</a></li>', $sUrl, $sValue);
+	}
+
+	function DisplayLineRadio($id, $sPath, $sValue)
+	{
+		printf('<li><input type="radio" name="destSameDoc" value="%s"/>%s</li>', $id, $sValue);
+	}
+
+	function DisplayLevel($sPath, array $aStructure, array $aChildren, $fDisplayLine)
+	{
+		if( ! empty($aChildren)) {
+			echo '<ul>';
+			foreach($aChildren as $id) {
+				$aData = $aStructure['lines'][$id];
+				if($aData['nature'] === CRSTLigne::TITRE) {
+					$this->$fDisplayLine($id, $sPath, $aData['value']);
+					$this->DisplayLevel($sPath, $aStructure, $aData['children'], $fDisplayLine);
+				}
+			}
+			echo '</ul>';
+		}
+	}
+
+	function DisplayDestinations($sFile, $a)
+	{
+		echo '<fieldset><legend>Destination</legend><input type="submit" value="Copier" name="cmdcopy"/>'
+			. '<input type="submit" value="Supprimer" name="cmddelete"/>'
+			. '<input type="submit" value="Déplacer" name="cmdmove"/><br>';
+		echo "<b>Autres documents, chapitre sources</b><ul>";
+		foreach($this->Lister() as $sPath => $sNature) {
+			printf('<li><input type="radio" name="destination" value="%s"/>&nbsp;%s</li>', md5($sPath), basename($sPath));
+		}
+		echo "</ul>";
+
+		echo "<b>Même document</b>";
+		$this->DisplayLevel($sFile, $a, $a['level0'], 'DisplayLineRadio');
+		echo "</fieldset>";
+	}
+
+	function DisplayIn(array $a, array $aData)
+	{
+		if( ! empty($aData['children'])) {
+			echo '<ul>';
+			foreach($aData['children'] as $id) {
+				if($a['lines'][$id]['nature'] !== CRSTLigne::TITRE) {
+					printf('<li><input name="%s" type="checkbox"/>%s</li>', $id, $a['lines'][$id]['value']);
+					$this->DisplayIn($a, $a['lines'][$id]);
+				}
+			}
+			echo '</ul>';
+		}
+	}
 }
 
-$oDoc = new CDocuments();
+$oDocList = new CDocuments();
 echo '<ul>';
-foreach($oDoc->Lister() as $sPath => $sNature) {
+foreach($oDocList->Lister() as $sPath => $sNature) {
 	$sUrl = sprintf('?doc=%s', urlencode($sPath));
 	printf('<li><a href="%s">%s</a></li>', $sUrl, basename($sPath));
 }
 echo '</ul>';
-
-function DisplayLevel($sPath, array $aStructure, array $aChildren)
-{
-	if( ! empty($aChildren)) {
-		echo '<ul>';
-		foreach($aChildren as $id) {
-			$aData = $aStructure['lines'][$id];
-			if($aData['nature'] === CRSTLigne::TITRE) {
-				$sUrl = sprintf('?doc=%s&title=%d', urlencode($sPath), $id);
-				printf('<li><a href="%s">%s</a></li>', $sUrl, $aData['value']);
-				DisplayLevel($sPath, $aStructure, $aData['children']);
-			}
-		}
-		echo '</ul>';
-	}
-}
-
-function DisplayIn(array $a, array $aData)
-{
-	//var_dump($aData);
-
-	if( ! empty($aData['children'])) {
-		echo '<ul>';
-		foreach($aData['children'] as $id) {
-			if($a['lines'][$id]['nature'] !== CRSTLigne::TITRE) {
-				printf('<li>%s</li>', $a['lines'][$id]['value']);
-				DisplayIn($a, $a['lines'][$id]);
-			}
-		}
-		echo '</ul>';
-	}
-}
 
 if(isset($_GET['doc'])) {
 	$sFile = $_GET['doc'];
 	if(is_file($sFile)) {
 		$oDoc = CRstLayers::Charger($sFile);
 		$a = $oDoc->Get();
-		DisplayLevel($sFile, $a, $a['level0']);
+		$oDocList->DisplayLevel($sFile, $a, $a['level0'], 'DisplayLineLink');
 
 		if(isset($_GET['title'])) {
+			echo '<form action="?" method="post">';
 			$idTitle = $_GET['title'];
 			var_dump($a['lines'][$idTitle]);
-			DisplayIn($a, $a['lines'][$idTitle]);
+			$oDocList->DisplayIn($a, $a['lines'][$idTitle]);
+			echo $oDocList->DisplayDestinations($sFile, $a) . '</form>';
 		}
 	}
 }
